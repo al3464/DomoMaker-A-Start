@@ -1,3 +1,4 @@
+require('dotenv').config();
 const path = require('path');
 const express = require('express');
 const compression = require('compression');
@@ -6,6 +7,10 @@ const mongoose = require('mongoose');
 const expressHandlebars = require('express-handlebars');
 const helmet  = require('helmet');
 const session = require('express-session');
+const RedisStore = require('connect-redis').RedisStore;
+const redis = require('redis');
+
+
 
 // import our router.js file to handle the MVC routes
 // In MVC, you have 'routes' that line up URLs to controller methods
@@ -21,6 +26,13 @@ mongoose.connect(dbURI).catch((err) => {
     }
 });
 
+const redisClient = redis.createClient({
+    url:process.env.REDISCLOUD_URL,
+});
+redisClient.on('error', error => console.log('Redis Client Error', err));
+
+
+redisClient.connect().then(() => {
 const app = express();
 
 app.use(helmet());
@@ -33,6 +45,9 @@ app.use(express.urlencoded({extended:true}));
 app.use(express.json());
 app.use(session({
     key: 'sessionid',
+    store: new RedisStore({
+        client: redisClient,
+    }),
     secret: 'Domo Arigato',
     resave: false,
     saveUninitialized: false,
@@ -50,5 +65,5 @@ app.listen(port, (err) =>{
     console.log(`Listening on port ${port}`);
 });
 
-
+})
 
