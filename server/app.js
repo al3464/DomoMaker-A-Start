@@ -29,7 +29,7 @@ mongoose.connect(dbURI).catch((err) => {
 const redisClient = redis.createClient({
     url:process.env.REDISCLOUD_URL,
 });
-redisClient.on('error', error => console.log('Redis Client Error', err));
+redisClient.on('error', error => console.log('Redis Client Error', error));
 
 
 redisClient.connect().then(() => {
